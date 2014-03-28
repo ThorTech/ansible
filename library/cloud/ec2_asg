@@ -42,6 +42,10 @@ options:
     description:
       - List of availability zone names in which to create the group.
     required: true
+  vpc_zone_identifier:
+    description:
+      - A comma-separated list of subnet identifiers of Amazon Virtual Private Clouds 
+    required: false
   launch_config_name:
     description:
       - Name of the Launch configuration to use for the group. See the ec2_lc module for managing these.
@@ -111,6 +115,7 @@ def create_autoscaling_group(connection, module):
     group_name = module.params.get('name')
     load_balancers = module.params['load_balancers']
     availability_zones = module.params['availability_zones']
+    vpc_zone_identifier = module.params['vpc_zone_identifier']
     launch_config_name = module.params.get('launch_config_name')
     min_size = module.params.get('min_size')
     max_size = module.params.get('max_size')
@@ -121,6 +126,7 @@ def create_autoscaling_group(connection, module):
         group_name=group_name,
         load_balancers=load_balancers,
         availability_zones=availability_zones,
+        vpc_zone_identifier=vpc_zone_identifier,
         launch_config=launch_configs[0],
         min_size=min_size,
         max_size=max_size,
@@ -161,6 +167,7 @@ def main():
             name = dict(required=True, type='str'),
             load_balancers = dict(required=False, type='list'),
             availability_zones = dict(required=True, type='list'),
+            vpc_zone_identifier = dict(required=False, type='list'),            
             launch_config_name = dict(required=True, type='str'),
             min_size = dict(required=True, type='int'),
             max_size = dict(required=True, type='int'),
