@@ -80,6 +80,12 @@ options:
       - The AWS region to use. If not specified then the value of the EC2_REGION environment variable, if any, is used.
     required: false
     aliases: ['aws_region', 'ec2_region']
+  scheme:
+    description:
+      - The scheme to use when creating the ELB. For a private VPC-visible ELB use 'internal'.
+    required: false
+    default: 'internet-facing'
+
 extends_documentation_fragment: aws
 """
 
@@ -110,6 +116,20 @@ EXAMPLES = """
         cookie_expiration_period: 1000
         lb_port: 80
     enable_cross_zone_load_balancing: yes 
+
+# Basic VPC provisioning example
+- local_action:
+    module: ec2_elb_lb
+    name: "test-vpc"
+    scheme: internal
+    state: present
+    subnets: 
+      - subnet-abcd1234
+      - subnet-1a2b3c4d
+    listeners:
+      - protocol: http # options are http, https, ssl, tcp
+        load_balancer_port: 80
+        instance_port: 80
 
 # Configure a health check
 - local_action:
@@ -190,7 +210,7 @@ class ElbManager(object):
 
     def __init__(self, module, name, listeners=None, purge_listeners=None,
                  zones=None, purge_zones=None, subnet_ids=None, security_group_ids=None, health_check=None,
-                 region=None, cookie_stickiness_policies=None, enable_cross_zone_load_balancing=None, access_log=None, **aws_connect_params):
+                 scheme="internet-facing", region=None, cookie_stickiness_policies=None, enable_cross_zone_load_balancing=None, access_log=None, **aws_connect_params):
         self.module = module
         self.name = name
         self.listeners = listeners
@@ -203,6 +223,7 @@ class ElbManager(object):
         self.cookie_stickiness_policies = cookie_stickiness_policies
         self.enable_cross_zone_load_balancing = enable_cross_zone_load_balancing
         self.access_log = access_log
+        self.scheme = scheme
         self.aws_connect_params = aws_connect_params
         self.region = region
 
@@ -250,7 +271,8 @@ class ElbManager(object):
                 'dns_name': check_elb.dns_name,
                 'zones': check_elb.availability_zones,
                 'security_group_ids': check_elb.security_groups,
-                'status': self.status
+                'status': self.status,
+                'scheme': check_elb.scheme
             }
 
             if check_elb.health_check:
@@ -302,7 +324,8 @@ class ElbManager(object):
                                                       zones=self.zones,
                                                       subnets=self.subnet_ids,
                                                       security_groups=self.security_group_ids,
-                                                      complex_listeners=listeners)
+                                                      complex_listeners=listeners,
+                                                      scheme=self.scheme)
         if self.elb:
             self.changed = True
             self.status = 'created'
@@ -541,7 +564,8 @@ def main():
             health_check={'default': None, 'required': False, 'type': 'dict'},
             cookie_stickiness_policies={'default': None, 'required': False, 'type': 'list'},
             enable_cross_zone_load_balancing={'default': None, 'required': False, 'type': 'bool'},
-            access_log={'default': None, 'required': False, 'type': 'dict'}
+            access_log={'default': None, 'required': False, 'type': 'dict'},
+            scheme={'default': 'internet-facing', 'required': False}
         )
     )
 
@@ -565,6 +589,7 @@ def main():
     cookie_stickiness_policies = module.params['cookie_stickiness_policies']
     enable_cross_zone_load_balancing = module.params['enable_cross_zone_load_balancing']
     access_log = module.params['access_log']
+    scheme = module.params['scheme']
 
     if state == 'present' and not listeners:
         module.fail_json(msg="At least one port is required for ELB creation")
@@ -572,9 +597,9 @@ def main():
     if state == 'present' and not (zones or subnet_ids):
         module.fail_json(msg="At least one availability zone is required for ELB creation")
 
-    elb_man = ElbManager(module, name, listeners, purge_listeners, zones,
+    elb_man = ElbManager(module, name, listeners, purge_listeners, zones, 
                          purge_zones, subnet_ids, security_group_ids, health_check, 
-                         cookie_stickiness_policies=cookie_stickiness_policies, enable_cross_zone_load_balancing=enable_cross_zone_load_balancing, access_log=access_log, region=region, **aws_connect_params)
+                         scheme, cookie_stickiness_policies=cookie_stickiness_policies, enable_cross_zone_load_balancing=enable_cross_zone_load_balancing, access_log=access_log, region=region, **aws_connect_params)
 
     if state == 'present':
         elb_man.ensure_ok()
