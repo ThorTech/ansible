@@ -200,8 +200,10 @@ class ElbManager(object):
             # Zones and listeners will be added at creation
             self._create_elb()
         else:
-            self._set_zones()
-            self._set_subnets()
+            if self.subnet_ids is not None:
+              self._set_subnets()
+            else:
+              self._set_zones()
             self._set_security_groups()
             self._set_elb_listeners()
         self._set_health_check()
