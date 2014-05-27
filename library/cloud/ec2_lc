@@ -47,6 +47,10 @@ options:
     description:
       - The SSH key name to be used for access to managed instances
     required: false
+  instance_profile_name:
+    description:
+      - The name or the Amazon Resource Name (ARN) of the instance profile associated with the IAM role for the instance.
+    required: false
   security_groups:
     description:
       - A list of security groups into which instances should be found
@@ -122,6 +126,7 @@ def create_launch_config(connection, module):
     name = module.params.get('name')
     image_id = module.params.get('image_id')
     key_name = module.params.get('key_name')
+    instance_profile_name = module.params.get('instance_profile_name')
     security_groups = module.params['security_groups']
     user_data = module.params.get('user_data')
     volumes = module.params['volumes']
@@ -141,6 +146,7 @@ def create_launch_config(connection, module):
         name=name,
         image_id=image_id,
         key_name=key_name,
+        instance_profile_name=instance_profile_name,
         security_groups=security_groups,
         user_data=user_data,
         block_device_mappings=[bdm],
@@ -179,6 +185,7 @@ def main():
             name=dict(required=True, type='str'),
             image_id=dict(type='str'),
             key_name=dict(type='str'),
+            instance_profile_name=dict(type='str'),
             security_groups=dict(type='list'),
             user_data=dict(type='str'),
             volumes=dict(type='list'),
