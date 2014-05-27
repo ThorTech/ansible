@@ -51,6 +51,10 @@ options:
     description:
       - The name or the Amazon Resource Name (ARN) of the instance profile associated with the IAM role for the instance.
     required: false
+  associate_public_ip_address:
+    description:
+      - Specifies whether to assign a public IP address to each instance launched in a Amazon VPC
+    required: false
   security_groups:
     description:
       - A list of security groups into which instances should be found
@@ -127,6 +131,7 @@ def create_launch_config(connection, module):
     image_id = module.params.get('image_id')
     key_name = module.params.get('key_name')
     instance_profile_name = module.params.get('instance_profile_name')
+    associate_public_ip_address = module.params.get('associate_public_ip_address')
     security_groups = module.params['security_groups']
     user_data = module.params.get('user_data')
     volumes = module.params['volumes']
@@ -147,6 +152,7 @@ def create_launch_config(connection, module):
         image_id=image_id,
         key_name=key_name,
         instance_profile_name=instance_profile_name,
+        associate_public_ip_address=associate_public_ip_address,
         security_groups=security_groups,
         user_data=user_data,
         block_device_mappings=[bdm],
@@ -186,6 +192,7 @@ def main():
             image_id=dict(type='str'),
             key_name=dict(type='str'),
             instance_profile_name=dict(type='str'),
+            associate_public_ip_address=dict(type='bool'),
             security_groups=dict(type='list'),
             user_data=dict(type='str'),
             volumes=dict(type='list'),
