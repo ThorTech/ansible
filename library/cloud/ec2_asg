@@ -67,6 +67,11 @@ options:
       - List of VPC subnets to use
     required: false
     default: None
+  asg_tags:
+    description:
+      - List of :class:`boto.ec2.autoscale.tag.Tag
+    required: false
+    default: None
 extends_documentation_fragment: aws
 """
 
@@ -121,6 +126,11 @@ def create_autoscaling_group(connection, module):
     desired_capacity = module.params.get('desired_capacity')
     vpc_zone_identifier = module.params.get('vpc_zone_identifier')
 
+    asg_tags=[]
+    if module.params.get('asg_tags'):
+      for tag_name,tag_value in module.params.get('asg_tags').iteritems():
+        asg_tags.append(Tag(key=tag_name,value=tag_value,propagate_at_launch=True,resource_id=group_name))
+
     launch_configs = connection.get_all_launch_configurations(names=[launch_config_name])
     
     as_groups = connection.get_all_groups(names=[group_name])
@@ -143,7 +153,8 @@ def create_autoscaling_group(connection, module):
                  max_size=max_size,
                  desired_capacity=desired_capacity,
                  vpc_zone_identifier=vpc_zone_identifier,
-                 connection=connection)
+                 connection=connection,
+                 tags=asg_tags)
 
         try:
             connection.create_auto_scaling_group(ag)
@@ -207,6 +218,7 @@ def main():
             desired_capacity=dict(type='int'),
             vpc_zone_identifier=dict(type='str'),
             state=dict(default='present', choices=['present', 'absent']),
+            asg_tags=dict(type='dict'),
         )
     )
     module = AnsibleModule(argument_spec=argument_spec)
