@@ -196,6 +196,9 @@ def rand(end, start=None, step=None):
     else:
         raise errors.AnsibleFilterError('random can only be used on sequences and integers')
 
+def ttsplit(s,sep):
+  return s.split(sep)
+
 class FilterModule(object):
     ''' Ansible core jinja2 filters '''
 
@@ -264,5 +267,8 @@ class FilterModule(object):
 
             # random numbers
             'random': rand,
+            
+            #tt filters
+            'ttsplit': ttsplit,
         }
 
