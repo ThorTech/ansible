@@ -28,7 +28,7 @@ options:
     required: true
     default: null
     aliases: []
-    choices: [ 'get', 'create', 'delete' ]
+    choices: [ 'get', 'create', 'delete', 'upsert' ]
   zone:
     description:
       - The DNS zone to modify
@@ -159,7 +159,7 @@ def commit(changes):
 def main():
     argument_spec = ec2_argument_spec()
     argument_spec.update(dict(
-            command         = dict(choices=['get', 'create', 'delete'], required=True),
+            command         = dict(choices=['get', 'create', 'delete', 'upsert'], required=True),
             zone            = dict(required=True),
             record          = dict(required=True),
             ttl             = dict(required=False, default=3600),
@@ -193,9 +193,9 @@ def main():
     if record_in[-1:] != '.':
         record_in += "."
 
-    if command_in == 'create' or command_in == 'delete':
+    if command_in == 'create' or command_in == 'upsert' or command_in == 'delete':
         if not value_in:
-            module.fail_json(msg = "parameter 'value' required for create/delete")
+            module.fail_json(msg = "parameter 'value' required for create/delete/upsert")
 
     # connect to the route53 endpoint 
     try:
@@ -252,7 +252,7 @@ def main():
         for v in record['values']:
             change.add_value(v)
 
-    if command_in == 'create' or command_in == 'delete':
+    if command_in == 'create' or command_in == 'upsert' or command_in == 'delete':
         change = changes.add_change(command_in.upper(), record_in, type_in, ttl_in)
         for v in value_list:
             change.add_value(v)
