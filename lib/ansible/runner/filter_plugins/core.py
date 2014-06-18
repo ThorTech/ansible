@@ -199,6 +199,11 @@ def rand(end, start=None, step=None):
 def ttsplit(s,sep):
   return s.split(sep)
 
+def tt_dict_union(d1,d2):
+  d3 = d1.copy()
+  d3.update(d2)
+  return d3
+
 class FilterModule(object):
     ''' Ansible core jinja2 filters '''
 
@@ -270,5 +275,6 @@ class FilterModule(object):
             
             #tt filters
             'ttsplit': ttsplit,
+            'tt_dict_union': tt_dict_union,
         }
 
