@@ -96,6 +96,7 @@ from ansible.module_utils.ec2 import *
 try:
     import boto.ec2.autoscale
     from boto.ec2.autoscale import AutoScaleConnection, AutoScalingGroup
+    from boto.ec2.autoscale.tag import Tag
     from boto.exception import BotoServerError
 except ImportError:
     print "failed=True msg='boto required for this module'"
