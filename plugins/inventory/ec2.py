@@ -123,6 +123,7 @@ from boto import ec2
 from boto import rds
 from boto import route53
 import ConfigParser
+import itertools
 
 try:
     import json
@@ -321,6 +322,21 @@ class Ec2Inventory(object):
             for instance in reservation.instances:
                 return instance
 
+    def create_filters (d):
+        return dict(('tag:'+k, v) for k,v in d)
+
+    def get_instances_by_tags(self, region, **kvargs):
+        ''' Get a list of instances matching tags '''
+        if self.eucalyptus:
+            conn = boto.connect_euca(self.eucalyptus_host)
+            conn.APIVersion = '2010-08-31'
+        else:
+            conn = ec2.connect_to_region(region)
+
+        filters = create_filters(kwargs.iteritems())
+        reservations = conn.get_all_reservations(filters=filters)
+        instances = list(itertools.chain.from_iterable([r.instances for r in reservations]))
+        return instances
 
     def add_instance(self, instance, region):
         ''' Adds an instance to the inventory and index, as long as it is
