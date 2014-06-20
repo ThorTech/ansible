@@ -98,8 +98,7 @@ try:
     from boto.ec2.autoscale import AutoScaleConnection, AutoScalingGroup
     from boto.ec2.autoscale.tag import Tag
     from boto.exception import BotoServerError
-    import logging
-    logging.basicConfig(filename="boto.log", level=logging.DEBUG)
+
 except ImportError:
     print "failed=True msg='boto required for this module'"
     sys.exit(1)
