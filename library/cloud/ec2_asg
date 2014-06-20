@@ -98,6 +98,8 @@ try:
     from boto.ec2.autoscale import AutoScaleConnection, AutoScalingGroup
     from boto.ec2.autoscale.tag import Tag
     from boto.exception import BotoServerError
+    import logging
+    logging.basicConfig(filename="boto.log", level=logging.DEBUG)
 except ImportError:
     print "failed=True msg='boto required for this module'"
     sys.exit(1)
@@ -188,8 +190,8 @@ def delete_autoscaling_group(connection, module):
     group_name = module.params.get('name')
     groups = connection.get_all_groups(names=[group_name])
     if groups:
-        group = groups[0]
-        group.shutdown_instances()
+        ogroup = groups[0]
+        ogroup.shutdown_instances()
 
         instances = True
         while instances:
@@ -200,7 +202,7 @@ def delete_autoscaling_group(connection, module):
                         instances = False
             time.sleep(10)
 
-        group.delete()
+        ogroup.delete()
         module.exit_json(changed=True)
     else:
         module.exit_json(changed=False)
