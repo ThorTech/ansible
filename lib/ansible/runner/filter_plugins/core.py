@@ -23,6 +23,7 @@ import types
 import pipes
 import glob
 import re
+import itertools
 import operator as py_operator
 from ansible import errors
 from ansible.utils import md5s
@@ -199,10 +200,29 @@ def rand(end, start=None, step=None):
 def ttsplit(s,sep):
   return s.split(sep)
 
+def tt_attr(d,k):
+  return d[k] if d.has_key(k) else ""
+
 def tt_dict_union(d1,d2):
   d3 = d1.copy()
   d3.update(d2)
   return d3
+
+def tt_dict_map(d1,l1):
+  return map (lambda k : d1[k], list(l1))
+
+def tt_list_filter(l1,k,v):
+  return list(itertools.ifilter(lambda hp: hp.has_key(k) and hp[k] == v, l1))
+
+def tt_list_filter2(l1,k1,k2,v):
+  return list(itertools.ifilter(lambda hp: hp.has_key(k1) and hp[k1].has_key(k2) and hp[k1][k2] == v, l1))
+
+def tt_list_filter3(l1,k1,k2,k3,v):
+  return list(itertools.ifilter(lambda hp: hp.has_key(k1) and hp[k1].has_key(k2) and hp[k1][k2].has_key(k3) and hp[k1][k2][k3] == v, l1))
+
+
+def tt_list_contains(l1,v):
+  return v in l1
 
 class FilterModule(object):
     ''' Ansible core jinja2 filters '''
@@ -275,6 +295,12 @@ class FilterModule(object):
             
             #tt filters
             'ttsplit': ttsplit,
+            'tt_attr': tt_attr,
             'tt_dict_union': tt_dict_union,
+            'tt_dict_map': tt_dict_map,
+            'tt_list_filter': tt_list_filter,
+            'tt_list_filter2': tt_list_filter2,
+            'tt_list_filter3': tt_list_filter3,
+            'tt_list_contains': tt_list_contains,
         }
 
