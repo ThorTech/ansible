@@ -76,6 +76,11 @@ options:
     required: false
     default: null
     aliases: []
+  instance_monitoring:
+    description:
+      - whether instances in group are launched with detailed monitoring.
+    required: false
+    default: false
 extends_documentation_fragment: aws
 """
 
@@ -136,6 +141,7 @@ def create_launch_config(connection, module):
     user_data = module.params.get('user_data')
     volumes = module.params['volumes']
     instance_type = module.params.get('instance_type')
+    instance_monitoring = module.params.get('instance_monitoring')
     bdm = BlockDeviceMapping()
 
     if volumes:
@@ -156,7 +162,8 @@ def create_launch_config(connection, module):
         security_groups=security_groups,
         user_data=user_data,
         block_device_mappings=[bdm],
-        instance_type=instance_type)
+        instance_type=instance_type,
+        instance_monitoring=instance_monitoring)
 
     launch_configs = connection.get_all_launch_configurations(names=[name])
     changed = False
@@ -198,6 +205,7 @@ def main():
             volumes=dict(type='list'),
             instance_type=dict(type='str'),
             state=dict(default='present', choices=['present', 'absent']),
+            instance_monitoring=dict(default=False, type='bool'),
         )
     )
 
