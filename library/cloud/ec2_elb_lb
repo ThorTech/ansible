@@ -496,6 +496,7 @@ class ElbManager(object):
                 self.elb_conn.set_lb_policies_of_listener(lb_name, lb_port, lb_policy_name)
 
     def _set_enable_cross_zone_load_balancing(self):
+        """Enables cross zone load balanc on ELB"""
         if self.enable_cross_zone_load_balancing:
             self.elb_conn.enable_cross_zone_load_balancing()
 
