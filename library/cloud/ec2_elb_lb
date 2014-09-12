@@ -188,7 +188,7 @@ class ElbManager(object):
     """Handles ELB creation and destruction"""
 
     def __init__(self, module, name, listeners=None, purge_listeners=None,
-                 zones=None, purge_zones=None subnet_ids=None, security_group_ids=None, health_check=None,
+                 zones=None, purge_zones=None, subnet_ids=None, security_group_ids=None, health_check=None,
                  region=None, cookie_stickiness_policies=None, enable_cross_zone_load_balancing=None, access_log=None, **aws_connect_params):
         self.module = module
         self.name = name
@@ -545,7 +545,7 @@ def main():
             security_group_ids={'default': None, 'required': False, 'type': 'list'},
             health_check={'default': None, 'required': False, 'type': 'dict'},
             cookie_stickiness_policies={'default': None, 'required': False, 'type': 'list'},
-            enable_cross_zone_load_balancing={'default': None, 'required': False, 'type': 'bool'}
+            enable_cross_zone_load_balancing={'default': None, 'required': False, 'type': 'bool'},
             access_log={'default': None, 'required': False, 'type': 'dict'}
         )
     )
