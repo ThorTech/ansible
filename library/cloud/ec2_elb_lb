@@ -178,6 +178,7 @@ try:
     import boto.ec2.elb
     import boto.ec2.elb.attributes
     from boto.ec2.elb.healthcheck import HealthCheck
+    from boto.ec2.elb.attributes import AccessLogAttribute
     from boto.regioninfo import RegionInfo
 except ImportError:
     print "failed=True msg='boto required for this module'"
@@ -513,24 +514,18 @@ class ElbManager(object):
         attributes = self.elb.get_attributes()
         if self.access_log:
             access_log_config = {
-                "EmitInterval": self.access_log['emit_interval'],
-                "Enabled": self.access_log['enabled'],
-                "S3BucketName": self.access_log['S3BucketName'],
-                "S3BucketPrefix": self.access_log['S3BucketPrefix']
+                "emit_interval": self.access_log['emit_interval'],
+                "enabled": self.access_log['enabled'],
+                "s3_bucket_name": self.access_log['S3BucketName'],
+                "s3_bucket_prefix": self.access_log['S3BucketPrefix']
             }
 
-            if not self.elb.access_log:
-                self.elb.access_log = AccessLogAttribute()
+            access_log = AccessLogAttribute()
 
             for attr, desired_value in access_log_config.iteritems():
-                if getattr(self.elb.access_log, attr) != desired_value:
-                    setattr(self.elb.access_log, attr, desired_value)
-                    update_access_log = True
+                setattr(access_log, attr, desired_value)
 
-            if update_access_log:
-                attributes.access_log = access_log_config
-
-            self.elb_conn.modify_lb_attribute(self.name, 'accessLog', attributes.access_log)
+            self.elb_conn.modify_lb_attribute(self.name, 'accessLog', access_log)
 
 def main():
     argument_spec = ec2_argument_spec()
